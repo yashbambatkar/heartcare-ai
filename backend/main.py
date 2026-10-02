@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -21,10 +22,9 @@ app = FastAPI(
 # CORS CONFIGURATION
 # ============================================================
 
-# Local React development URL
-# Later, add your Vercel URL here.
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://heartcare-p7weuxyot-yash-f638.vercel.app",
 ]
 
 
@@ -121,62 +121,44 @@ def health():
 @app.post("/predict")
 def predict(data: PatientData):
 
-    # --------------------------------------------------------
-    # CREATE INPUT DATAFRAME
-    # --------------------------------------------------------
-
     input_data = pd.DataFrame({
 
         "age": [data.age],
-
         "sex": [data.sex],
-
         "cp": [data.cp],
-
         "trestbps": [data.trestbps],
-
         "chol": [data.chol],
-
         "fbs": [data.fbs],
-
         "restecg": [data.restecg],
-
         "thalach": [data.thalach],
-
         "exang": [data.exang],
-
         "oldpeak": [data.oldpeak],
-
         "slope": [data.slope],
-
         "ca": [data.ca],
-
         "thal": [data.thal]
 
     })
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # SCALE INPUT
-    # --------------------------------------------------------
+    # ========================================================
 
-    input_scaled = scaler.transform(
-        input_data
-    )
+    input_scaled = scaler.transform(input_data)
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # MODEL PREDICTION
-    # --------------------------------------------------------
+    # ========================================================
 
     prediction = model.predict(
         input_scaled
     )[0]
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # PREDICTION PROBABILITY
-    # --------------------------------------------------------
+    # ========================================================
 
     probabilities = model.predict_proba(
         input_scaled
@@ -187,9 +169,9 @@ def predict(data: PatientData):
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # RESPONSE
-    # --------------------------------------------------------
+    # ========================================================
 
     return {
 
