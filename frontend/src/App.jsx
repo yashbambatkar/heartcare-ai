@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   HeartPulse,
@@ -12,7 +11,11 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+
 import "./index.css";
+
+const BACKEND_URL =
+  "https://heartcare-ai-backend-muwq.onrender.com";
 
 function App() {
   const [formData, setFormData] = useState({
@@ -68,34 +71,35 @@ function App() {
     setResult(null);
 
     try {
-      const response = await fetch(
-        "https://heartcare-ai-backend-muwq.onrender.com/predict",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/predict`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const responseText = await response.text();
 
       if (!response.ok) {
-        throw new Error("Prediction request failed");
+        throw new Error(
+          `Backend returned ${response.status}: ${responseText}`
+        );
       }
 
-      const data = await response.json();
+      const data = JSON.parse(responseText);
 
       setResult(data);
     } catch (error) {
-      console.error(error);
+      console.error("Prediction Error:", error);
 
       setResult({
         error:
-          "Unable to connect to the backend. Please try again.",
+          "Unable to connect to the backend. Please check that the Render backend is running and CORS is configured correctly.",
       });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -106,6 +110,7 @@ function App() {
       <nav className="navbar">
 
         <div className="logo">
+
           <div className="logo-icon">
             <HeartPulse size={25} />
           </div>
@@ -114,6 +119,7 @@ function App() {
             <h2>HeartCare AI</h2>
             <span>Intelligent Health Analytics</span>
           </div>
+
         </div>
 
         <div className="nav-status">
@@ -290,7 +296,10 @@ function App() {
 
       {/* PREDICTION */}
 
-      <section className="prediction-section" id="prediction">
+      <section
+        className="prediction-section"
+        id="prediction"
+      >
 
         <div className="section-heading">
 
