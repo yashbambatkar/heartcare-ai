@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,10 +5,6 @@ import pandas as pd
 import joblib
 import os
 
-
-# ============================================================
-# CREATE FASTAPI APP
-# ============================================================
 
 app = FastAPI(
     title="HeartCare AI API",
@@ -22,17 +17,14 @@ app = FastAPI(
 # CORS CONFIGURATION
 # ============================================================
 
-ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "https://heartcare-p7weuxyot-yash-f638.vercel.app",
-]
-
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=[
+        "https://heartcare-p7weuxyot-yash-f638.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,9 +36,7 @@ app.add_middleware(
 # ============================================================
 
 BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
+    os.path.dirname(os.path.abspath(__file__))
 )
 
 MODEL_PATH = os.path.join(
@@ -71,11 +61,10 @@ scaler = joblib.load(SCALER_PATH)
 
 
 # ============================================================
-# INPUT DATA STRUCTURE
+# INPUT DATA
 # ============================================================
 
 class PatientData(BaseModel):
-
     age: float
     sex: int
     cp: int
@@ -97,7 +86,6 @@ class PatientData(BaseModel):
 
 @app.get("/")
 def home():
-
     return {
         "message": "HeartCare AI Backend is working!"
     }
@@ -109,7 +97,6 @@ def home():
 
 @app.get("/health")
 def health():
-
     return {
         "status": "healthy",
         "service": "HeartCare AI API"
@@ -123,12 +110,7 @@ def health():
 @app.post("/predict")
 def predict(data: PatientData):
 
-    # ========================================================
-    # CREATE INPUT DATAFRAME
-    # ========================================================
-
     input_data = pd.DataFrame({
-
         "age": [data.age],
         "sex": [data.sex],
         "cp": [data.cp],
@@ -142,52 +124,17 @@ def predict(data: PatientData):
         "slope": [data.slope],
         "ca": [data.ca],
         "thal": [data.thal]
-
     })
 
+    input_scaled = scaler.transform(input_data)
 
-    # ========================================================
-    # SCALE INPUT
-    # ========================================================
+    prediction = model.predict(input_scaled)[0]
 
-    input_scaled = scaler.transform(
-        input_data
-    )
+    probabilities = model.predict_proba(input_scaled)[0]
 
-
-    # ========================================================
-    # MODEL PREDICTION
-    # ========================================================
-
-    prediction = model.predict(
-        input_scaled
-    )[0]
-
-
-    # ========================================================
-    # PREDICTION PROBABILITY
-    # ========================================================
-
-    probabilities = model.predict_proba(
-        input_scaled
-    )[0]
-
-    probability = (
-        probabilities[int(prediction)] * 100
-    )
-
-
-    # ========================================================
-    # RESPONSE
-    # ========================================================
+    probability = probabilities[int(prediction)] * 100
 
     return {
-
         "prediction": int(prediction),
-
-        "probability": round(
-            float(probability),
-            2
-        )
-
+        "probability": round(float(probability), 2)
     }
