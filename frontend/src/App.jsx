@@ -10,9 +10,13 @@ import {
   Stethoscope,
   CheckCircle2,
   AlertCircle,
+  Bot,
+  Sparkles,
+  MessageCircle,
 } from "lucide-react";
 
 import "./index.css";
+import "./motion.css";
 
 const BACKEND_URL =
   "https://heartcare-ai-backend-muwq.onrender.com";
@@ -36,6 +40,8 @@ function App() {
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(true);
+  const [assistantMessage, setAssistantMessage] = useState("Hi! I’m your HeartCare AI assistant. Fill in the patient details and I’ll guide you through this educational demo.");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,6 +70,12 @@ function App() {
     });
 
     setResult(null);
+  };
+
+  const goToPrediction = () => {
+    document.getElementById("prediction")?.scrollIntoView({ behavior: "smooth" });
+    setAssistantMessage("You’re in the right place. Enter the example health measurements, then select Analyze Patient Data.");
+    setAssistantOpen(true);
   };
 
   const handlePredict = async () => {
@@ -708,6 +720,45 @@ function App() {
 
       </footer>
 
+      {/* FLOATING AI ROBOT ASSISTANT */}
+      <div className="robot-assistant">
+        {assistantOpen && (
+          <div className="robot-chat" role="status">
+            <button
+              className="robot-chat-close"
+              aria-label="Close assistant message"
+              onClick={() => setAssistantOpen(false)}
+            >
+              ×
+            </button>
+            <div className="robot-chat-heading">
+              <span className="robot-online-dot" />
+              <strong>HeartCare Assistant</strong>
+              <Sparkles size={15} />
+            </div>
+            <p>{loading
+              ? "Scanning the submitted data and waiting for the model response…"
+              : result && !result.error
+                ? "Analysis finished. Remember: this is a model prediction for learning, not a medical diagnosis."
+                : assistantMessage}</p>
+            <button className="robot-chat-action" onClick={goToPrediction}>
+              Open assessment <ArrowRight size={15} />
+            </button>
+          </div>
+        )}
+        <button
+          className={`robot-orb ${loading ? "robot-orb-scanning" : ""}`}
+          aria-label="Toggle HeartCare AI assistant"
+          onClick={() => setAssistantOpen((open) => !open)}
+        >
+          <span className="robot-orb-halo" />
+          <span className="robot-orb-face">
+            <Bot size={34} strokeWidth={1.7} />
+          </span>
+          <span className="robot-orb-sparkle"><Sparkles size={15} /></span>
+          <span className="robot-orb-pulse" />
+        </button>
+      </div>
     </div>
   );
 }
