@@ -20,7 +20,9 @@ app = FastAPI(
 # CORS CONFIGURATION
 # ============================================================
 
+
 ALLOWED_ORIGINS = [
+    "https://heartcare-ai-psi.vercel.app",
     "https://heartcare-p7weuxyot-yash-f638.vercel.app",
     "http://localhost:5173",
     "http://localhost:5174",
